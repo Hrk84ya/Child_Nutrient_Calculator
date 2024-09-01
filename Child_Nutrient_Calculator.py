@@ -29,7 +29,6 @@ class ChildNutritionCalculator:
         elif 4 < self.age <= 8:
             return 1800
         else:
-            # For ages greater than 8, you may define a value or handle accordingly
             return 2200  # Example value for children older than 8
 
     def calculate_daily_calories(self, food_items):
@@ -61,27 +60,60 @@ class ChildNutritionCalculator:
         else:
             return "Obese"
 
-# Taking inputs from the user
-Name = input("Enter the name of the child: ")
-Age = int(input("Enter the age of the child: "))
-Gender = input("Enter the gender of the child: ")
-height = float(input("Enter height in inches: "))
-weight = float(input("Enter weight in pounds: "))
-child = ChildNutritionCalculator(Name, Age, Gender, height, weight)
+def get_positive_float(prompt):
+    """
+    Helper function to get a positive float input from the user.
+    """
+    while True:
+        try:
+            value = float(input(prompt))
+            if value <= 0:
+                print("Please enter a positive number.")
+            else:
+                return value
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
 
-# Taking consumed food products as input
-milk = float(input("Enter amount of milk consumed (in cups): "))
-egg = float(input("Enter amount of eggs consumed (in count): "))
-rice = float(input("Enter amount of rice consumed (in cups): "))
-lentils = float(input("Enter amount of lentils consumed (in cups): "))
-vegetable = float(input("Enter amount of vegetables consumed (in cups): "))
-Meat = float(input("Enter amount of meat consumed (in ounces): "))
+def get_non_negative_float(prompt):
+    """
+    Helper function to get a non-negative float input from the user.
+    """
+    while True:
+        try:
+            value = float(input(prompt))
+            if value < 0:
+                print("Please enter a non-negative number.")
+            else:
+                return value
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
 
-food_consumption = {"Milk": milk, "Egg": egg, "Rice": rice, "Lentils": lentils, "Vegetable": vegetable, "Meat": Meat}
-Daily_Calories = child.calculate_daily_calories(food_consumption)
-NUTRITION_STATUS = child.check_nutrition_status(Daily_Calories)
+def main():
+    # Taking inputs from the user
+    Name = input("Enter the name of the child: ")
+    Age = int(get_positive_float("Enter the age of the child (in years): "))
+    Gender = input("Enter the gender of the child: ")
+    height = get_positive_float("Enter height in inches: ")
+    weight = get_positive_float("Enter weight in pounds: ")
 
-print(f"{child.name} has a BMI of {child.calculate_bmi():.2f}")
-print(f"Minimum daily calorie requirement: {child.calculate_min_calories()} calories")
-print(f"Daily calorie consumption: {Daily_Calories} calories")
-print(f"Nutrition status: {NUTRITION_STATUS}")
+    child = ChildNutritionCalculator(Name, Age, Gender, height, weight)
+
+    # Taking consumed food products as input
+    milk = get_non_negative_float("Enter amount of milk consumed (in cups): ")
+    egg = get_non_negative_float("Enter amount of eggs consumed (in count): ")
+    rice = get_non_negative_float("Enter amount of rice consumed (in cups): ")
+    lentils = get_non_negative_float("Enter amount of lentils consumed (in cups): ")
+    vegetable = get_non_negative_float("Enter amount of vegetables consumed (in cups): ")
+    Meat = get_non_negative_float("Enter amount of meat consumed (in ounces): ")
+
+    food_consumption = {"Milk": milk, "Egg": egg, "Rice": rice, "Lentils": lentils, "Vegetable": vegetable, "Meat": Meat}
+    Daily_Calories = child.calculate_daily_calories(food_consumption)
+    NUTRITION_STATUS = child.check_nutrition_status(Daily_Calories)
+
+    print(f"{child.name} has a BMI of {child.calculate_bmi():.2f}")
+    print(f"Minimum daily calorie requirement: {child.calculate_min_calories()} calories")
+    print(f"Daily calorie consumption: {Daily_Calories} calories")
+    print(f"Nutrition status: {NUTRITION_STATUS}")
+
+if __name__ == "__main__":
+    main()
