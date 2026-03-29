@@ -7,7 +7,7 @@ A Python application for calculating and assessing a child's nutritional needs b
 - Calculate Body Mass Index (BMI) for a child.
 - Determine the minimum daily calorie requirement based on the child's age.
 - Calculate total daily calorie intake based on the consumption of various food items.
-- Assess nutritional status (e.g., Underweight, Healthy, Overweight, Obese) based on BMI.
+- Assess nutritional status (e.g., Underweight, Healthy, Overweight, Obese) based on age- and gender-specific BMI thresholds.
 - User-friendly graphical interface with a scrollable frame for easy data input and result display.
 
 ## Prerequisites
@@ -29,14 +29,14 @@ A Python application for calculating and assessing a child's nutritional needs b
 
 3. **Run the application**:
     ```bash
-    python nutrition_calculator.py
+    python Child_Nutrient_Calculator.py
     ```
 
 ## Usage
 
-1. **Enter the child’s details**:
+1. **Enter the child's details**:
     - Name
-    - Age (years)
+    - Age (1-13 years)
     - Gender
     - Height (inches)
     - Weight (pounds)
@@ -51,14 +51,11 @@ A Python application for calculating and assessing a child's nutritional needs b
 
 3. **Click the "Calculate" button** to compute the BMI, daily calorie needs, and nutritional status based on the provided data.
 
-4. **View the results** in the text box below the button.
+4. **View the results** displayed across three tabs: Summary, Nutrition Details, and Meal Plan.
 
 ## Example
 
-Here’s an example of what the results might look like:
-
-- John has a BMI of 18.75 Minimum daily calorie requirement: 1400 calories Daily calorie consumption: 1350 calories Nutrition status: Healthy
-
+After entering a child's details and clicking Calculate, the app displays a graphical report with BMI, nutritional status, daily calorie intake vs. target, macronutrient breakdown, detailed nutrient progress bars, and personalized meal plan suggestions.
 
 ## Contributing
 
@@ -71,7 +68,6 @@ Contributions are welcome! If you have suggestions for improvements or new featu
 5. Push to the branch (`git push origin feature-branch`).
 6. Create a new Pull Request.
 
-
 ## Acknowledgements
 
 - Tkinter for creating the graphical user interface.
@@ -80,5 +76,3 @@ Contributions are welcome! If you have suggestions for improvements or new featu
 ---
 
 Feel free to reach out if you have any questions or need further assistance!
-
-
