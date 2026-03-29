@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
-import math
+from typing import Dict, List
 
 # ─── Color Palette & Theme ───────────────────────────────────────────────────
 COLORS = {
@@ -72,6 +71,12 @@ class ChildNutritionCalculator:
     }
 
     def __init__(self, name, age, gender, height_inch, weight_pound):
+        if age < 1 or age > 13:
+            raise ValueError("Age must be between 1 and 13 years.")
+        if height_inch <= 0:
+            raise ValueError("Height must be greater than zero.")
+        if weight_pound <= 0:
+            raise ValueError("Weight must be greater than zero.")
         self.name = name
         self.age = age
         self.gender = gender
@@ -90,11 +95,11 @@ class ChildNutritionCalculator:
         return (self.weight_pound / (self.height_inch ** 2)) * 703
 
     def calculate_min_calories(self):
-        if 0 <= self.age <= 2:
-            return 800
-        elif 2 < self.age <= 4:
+        if 1 <= self.age <= 3:
+            return 1000
+        elif 4 <= self.age <= 8:
             return 1400
-        elif 4 < self.age <= 8:
+        elif 9 <= self.age <= 13:
             return 1800
         else:
             return 2200
@@ -103,6 +108,8 @@ class ChildNutritionCalculator:
         self.nutrition_totals = {k: 0 for k in self.nutrition_totals}
         self.food_intake = food_items
         for food, quantity in food_items.items():
+            if quantity < 0:
+                raise ValueError(f"Quantity for {food} cannot be negative.")
             if food in self.FOOD_DB and quantity > 0:
                 fi = self.FOOD_DB[food]
                 self.nutrition_totals['calories'] += fi.calories * quantity
@@ -117,9 +124,9 @@ class ChildNutritionCalculator:
         return self.nutrition_totals
 
     def get_daily_recommendations(self) -> dict:
-        if 1 <= self.age <= 3:
+        if self.age <= 3:
             return self.DAILY_NUTRIENT_NEEDS['1-3']
-        elif 4 <= self.age <= 8:
+        elif self.age <= 8:
             return self.DAILY_NUTRIENT_NEEDS['4-8']
         else:
             return self.DAILY_NUTRIENT_NEEDS['9-13']
@@ -162,15 +169,36 @@ class ChildNutritionCalculator:
             })
         return meal_plan
 
-    def check_nutrition_status(self, daily_calories):
+    def check_nutrition_status(self):
         bmi = self.calculate_bmi()
-        if bmi < 16:
-            return "Severely Underweight"
-        elif 16 < bmi <= 18.5:
+
+        # Age- and gender-specific BMI percentile thresholds for children.
+        # Each entry maps an age to (underweight_5th, healthy_85th, overweight_95th)
+        # boundaries. Values are approximate CDC midpoints for boys/girls.
+        bmi_thresholds_boys = {
+            1: (14.5, 18.2, 19.2), 2: (14.5, 18.0, 19.0), 3: (14.0, 17.4, 18.2),
+            4: (13.8, 17.0, 17.8), 5: (13.8, 17.0, 17.9), 6: (13.7, 17.4, 18.4),
+            7: (13.7, 17.9, 19.1), 8: (13.8, 18.5, 19.9), 9: (14.0, 19.1, 20.7),
+            10: (14.2, 19.8, 21.6), 11: (14.5, 20.6, 22.5), 12: (14.9, 21.3, 23.4),
+            13: (15.4, 22.0, 24.2),
+        }
+        bmi_thresholds_girls = {
+            1: (14.0, 18.0, 19.0), 2: (14.0, 17.8, 18.8), 3: (13.6, 17.2, 18.2),
+            4: (13.4, 17.0, 18.0), 5: (13.3, 17.1, 18.2), 6: (13.3, 17.5, 18.8),
+            7: (13.4, 18.0, 19.6), 8: (13.5, 18.7, 20.6), 9: (13.7, 19.5, 21.5),
+            10: (14.0, 20.3, 22.6), 11: (14.4, 21.2, 23.7), 12: (14.8, 22.1, 24.8),
+            13: (15.3, 23.0, 25.8),
+        }
+
+        age_key = max(1, min(self.age, 13))
+        thresholds = bmi_thresholds_boys if self.gender == "Male" else bmi_thresholds_girls
+        underweight, overweight, obese = thresholds[age_key]
+
+        if bmi < underweight:
             return "Underweight"
-        elif 18.5 < bmi <= 25:
+        elif bmi <= overweight:
             return "Healthy"
-        elif 25 < bmi <= 30:
+        elif bmi <= obese:
             return "Overweight"
         else:
             return "Obese"
@@ -228,7 +256,6 @@ class RoundedEntry(tk.Canvas):
 
     def delete(self, first, last):
         self._entry.delete(first, last)
-        self._show_placeholder()
 
     def insert(self, index, string):
         self._entry.config(fg=COLORS["text"])
@@ -520,6 +547,8 @@ class NutritionApp:
 
             if not all([name, age > 0, height > 0, weight > 0]):
                 raise ValueError("Please fill in all required fields with valid values.")
+            if gender not in ("Male", "Female"):
+                raise ValueError("Please select a gender.")
 
             food_items = {
                 "Milk": float(self.entries["Milk"].get() or 0),
@@ -534,7 +563,7 @@ class NutritionApp:
             bmi = calculator.calculate_bmi()
             min_calories = calculator.calculate_min_calories()
             nutrition = calculator.calculate_nutrition(food_items)
-            status = calculator.check_nutrition_status(nutrition['calories'])
+            status = calculator.check_nutrition_status()
             meal_plan = calculator.generate_meal_plan()
 
             self._show_summary(name, bmi, min_calories, nutrition, status)
@@ -554,8 +583,7 @@ class NutritionApp:
         # Status color
         status_colors = {
             "Healthy": COLORS["success"], "Underweight": COLORS["warning"],
-            "Severely Underweight": COLORS["danger"], "Overweight": COLORS["warning"],
-            "Obese": COLORS["danger"],
+            "Overweight": COLORS["warning"], "Obese": COLORS["danger"],
         }
         sc = status_colors.get(status, COLORS["text_dim"])
 
